@@ -7,18 +7,31 @@ import pygame
 from nhlpy import NHLClient
 from nhlpy.http_client import NHLApiException
 
-from siren import Siren
+import hardware as hw
 
 TEAM = "LAK"
 SCHEDULE_POLL_INTERVAL = 3600
-ON_TEAM_SCORE_DELAY = 1
+ON_TEAM_SCORE_DELAYS = 0, 5, 10, 30
+ON_TEAM_SCORE_DELAY = ON_TEAM_SCORE_DELAYS[0]
 
 
-client = NHLClient()
-siren = Siren()
+def on_delay_changed(delay):
+    global ON_TEAM_SCORE_DELAY  # pylint: disable=global-statement
+    ON_TEAM_SCORE_DELAY = delay
+    print(f"Delay changed to {delay} seconds")
 
+
+# setup hardware
+hw.hardware_init()
+siren = hw.Siren()
+ui = hw.CycleUI(ON_TEAM_SCORE_DELAYS, on_delay_changed)
+
+# setup sfx
 pygame.mixer.init()
 pygame.mixer.music.load("goal.mp3")
+
+# setup NHL client
+client = NHLClient()
 
 
 def get_next_game(team: str) -> Optional[tuple[int, datetime]]:
@@ -120,7 +133,7 @@ def on_team_score():
 
     siren.enable()
     pygame.mixer.music.play()
-    while pygame.mixer.get_busy():
+    while pygame.mixer.music.get_busy():
         pass
     siren.disable()
 
@@ -132,4 +145,4 @@ while True:
     except KeyboardInterrupt:
         break
 
-siren.shutdown()
+hw.hardware_deinit()

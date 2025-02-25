@@ -1,6 +1,6 @@
 import pygame
 
-from siren import Siren
+from hardware import Siren
 
 siren = Siren()
 
