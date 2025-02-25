@@ -1,10 +1,8 @@
 import sys
 import time
 from datetime import datetime, timezone
-from os import environ
 from typing import Callable, Optional
 
-environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "1"
 import pygame
 from nhlpy import NHLClient
 from nhlpy.http_client import NHLApiException
@@ -18,6 +16,7 @@ ON_TEAM_SCORE_DELAY = 1
 
 client = NHLClient()
 siren = Siren()
+
 pygame.mixer.init()
 pygame.mixer.music.load("goal.mp3")
 
