@@ -83,5 +83,5 @@ class CycleUI:
             # setup button interrupt
             GPIO.setup(_BUTTON_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
             GPIO.add_event_detect(
-                _BUTTON_PIN, GPIO.RISING, _on_button_press, bouncetime=100
+                _BUTTON_PIN, GPIO.RISING, _on_button_press, bouncetime=200
             )

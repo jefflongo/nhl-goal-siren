@@ -1,3 +1,4 @@
+import argparse
 import sys
 import time
 from datetime import datetime, timezone
@@ -9,7 +10,6 @@ from nhlpy.http_client import NHLApiException
 
 import hardware as hw
 
-TEAM = "LAK"
 SCHEDULE_POLL_INTERVAL = 3600
 ON_TEAM_SCORE_DELAYS = 0, 5, 10, 30
 ON_TEAM_SCORE_DELAY = ON_TEAM_SCORE_DELAYS[0]
@@ -20,6 +20,22 @@ def on_delay_changed(delay):
     ON_TEAM_SCORE_DELAY = delay
     print(f"Delay changed to {delay} seconds")
 
+
+def validate_team(value):
+    if isinstance(value, str) and len(value) == 3 and value.isalpha():
+        return value
+    raise argparse.ArgumentTypeError(
+        "Argument must be a three-letter team name (i.e. LAK)"
+    )
+
+
+parser = argparse.ArgumentParser()
+parser.add_argument(
+    "team", type=validate_team, help="Three-letter team name abbreviation"
+)
+TEAM = parser.parse_args().team
+
+print("Starting...")
 
 # setup hardware
 hw.hardware_init()
@@ -107,7 +123,7 @@ def monitor_game(game_id: int, handler: Callable[[], None]) -> None:
         print("Failed to retrieve game", file=sys.stderr)
         return
 
-    side = "homeTeam" if info["homeTeam"] == TEAM else "awayTeam"
+    side = "homeTeam" if info["homeTeam"]["abbrev"] == TEAM else "awayTeam"
     team_score = info[side]["score"]
 
     while info["gameState"] != "OFF":
@@ -125,7 +141,7 @@ def monitor_game(game_id: int, handler: Callable[[], None]) -> None:
             team_score = new_team_score
             handler()
 
-    print("Game ended")
+    print(f"{TEAM} game ended")
 
 
 def on_team_score():
@@ -134,7 +150,7 @@ def on_team_score():
     siren.enable()
     pygame.mixer.music.play()
     while pygame.mixer.music.get_busy():
-        pass
+        time.sleep(0.1)
     siren.disable()
 
 
@@ -143,6 +159,7 @@ while True:
         game_id = wait_for_next_game()
         monitor_game(game_id, on_team_score)
     except KeyboardInterrupt:
+        print("Shutting down...")
         break
-
-hw.hardware_deinit()
+    finally:
+        hw.hardware_deinit()
