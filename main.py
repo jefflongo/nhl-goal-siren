@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 import argparse
 import sys
 import time
@@ -122,6 +124,15 @@ def monitor_game(game_id: int, handler: Callable[[], None]) -> None:
     except NHLApiException:
         print("Failed to retrieve game", file=sys.stderr)
         return
+
+    while info["gameState"] in ("FUT", "PRE"):
+        # game hasn't started yet, wait it out
+        time.sleep(1)
+        try:
+            info = client.game_center.boxscore(game_id)
+        except NHLApiException:
+            # silently ignore and try again
+            continue
 
     side = "homeTeam" if info["homeTeam"]["abbrev"] == TEAM else "awayTeam"
     team_score = info[side]["score"]

@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 import pygame
 
 from hardware import Siren
