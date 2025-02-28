@@ -55,7 +55,7 @@ class CycleUI:
     def __init__(
         self,
         items: tuple[Any, Any, Any, Any],
-        start_item=0,
+        start_item: int = 0,
         on_change: Optional[Callable[[Any], None]] = None,
     ):
         assert start_item < len(items)

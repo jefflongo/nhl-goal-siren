@@ -30,6 +30,7 @@ def validate_team(value):
     )
 
 
+# parse team
 parser = argparse.ArgumentParser()
 parser.add_argument(
     "team", type=validate_team, help="Three-letter team name abbreviation"
@@ -70,17 +71,22 @@ except ValueError:
     on_delay_changed(ON_TEAM_SCORE_DELAYS[INITIAL_DELAY_INDEX])
 
 
-# setup hardware
-hw.hardware_init()
-siren = hw.Siren()
-ui = hw.CycleUI(ON_TEAM_SCORE_DELAYS, INITIAL_DELAY_INDEX, on_delay_changed)
+try:
+    # setup hardware
+    hw.hardware_init()
+    siren = hw.Siren()
+    ui = hw.CycleUI(ON_TEAM_SCORE_DELAYS, INITIAL_DELAY_INDEX, on_delay_changed)
 
-# setup sfx
-pygame.mixer.init()
-pygame.mixer.music.load(GOAL_SFX)
+    # setup sfx
+    pygame.mixer.init()
+    pygame.mixer.music.load(GOAL_SFX)
 
-# setup NHL client
-client = NHLClient()
+    # setup NHL client
+    client = NHLClient()
+except Exception as e:
+    print(f"Startup failed: {e}", file=sys.stderr)
+    hw.hardware_deinit()
+    raise SystemExit(1) from e
 
 
 def get_next_game(team: str) -> Optional[tuple[int, datetime]]:
