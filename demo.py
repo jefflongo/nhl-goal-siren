@@ -2,15 +2,16 @@
 
 import pygame
 
-from hardware import Siren
+import hardware as hw
 
-siren = Siren()
+hw.hardware_init()
+siren = hw.Siren()
 
 pygame.mixer.init()
 pygame.mixer.music.load("goal.mp3")
 
-try:
-    while True:
+while True:
+    try:
         input("Press enter for goal")
         print("GOAL!!!")
         siren.enable()
@@ -18,5 +19,7 @@ try:
         while pygame.mixer.music.get_busy():
             pass
         siren.disable()
-except KeyboardInterrupt:
-    siren.shutdown()
+    except KeyboardInterrupt:
+        break
+    finally:
+        hw.hardware_deinit()

@@ -55,33 +55,34 @@ class CycleUI:
     def __init__(
         self,
         items: tuple[Any, Any, Any, Any],
-        on_change: Optional[Callable[[Any], None]],
+        start_item=0,
+        on_change: Optional[Callable[[Any], None]] = None,
     ):
+        assert start_item < len(items)
         if _RASPBERRY_PI:
-            self._current = 0
-
-            # setup LEDs
             leds = _LED0_PIN, _LED1_PIN, _LED2_PIN
-            GPIO.setup(leds, GPIO.OUT, initial=GPIO.HIGH)
+            self._current = start_item
 
-            # setup button handler
-            def _on_button_press(_) -> None:
-                # update the current index
-                self._current = (self._current + 1) % len(items)
-
-                # update the UI
+            def update_ui() -> None:
                 led_states = [
                     GPIO.LOW if i < self._current else GPIO.HIGH
                     for i in range(len(leds))
                 ]
                 GPIO.output(leds, led_states)
 
-                # invoke user callback
+            def on_button_press(_) -> None:
+                self._current = (self._current + 1) % len(items)
+                update_ui()
+
                 if on_change is not None:
                     on_change(items[self._current])
+
+            # set initial LED states
+            GPIO.setup(leds, GPIO.OUT, initial=GPIO.HIGH)
+            update_ui()
 
             # setup button interrupt
             GPIO.setup(_BUTTON_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
             GPIO.add_event_detect(
-                _BUTTON_PIN, GPIO.RISING, _on_button_press, bouncetime=200
+                _BUTTON_PIN, GPIO.RISING, on_button_press, bouncetime=200
             )
