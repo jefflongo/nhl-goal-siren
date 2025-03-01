@@ -19,7 +19,7 @@ GOAL_SFX = Path(SCRIPT_DIR, "goal.mp3")
 CONFIG_FILE = Path(SCRIPT_DIR, "config.ini")
 
 SCHEDULE_POLL_INTERVAL = 3600
-ON_TEAM_SCORE_DELAYS = 0, 5, 10, 30
+ON_TEAM_SCORE_DELAYS = 0, 10, 30, 60
 
 
 def validate_team(value):
