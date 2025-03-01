@@ -83,6 +83,7 @@ try:
 
     # setup NHL client
     client = NHLClient()
+
 except Exception as e:
     print(f"Startup failed: {e}", file=sys.stderr)
     hw.hardware_deinit()
@@ -202,12 +203,18 @@ def on_team_score(team_score: int) -> None:
     siren.disable()
 
 
-while True:
-    try:
-        game_id = wait_for_next_game()
-        monitor_game(game_id, on_team_score)
-    except KeyboardInterrupt:
-        print("Shutting down...")
-        break
-    finally:
-        hw.hardware_deinit()
+try:
+    while True:
+        try:
+            game_id = wait_for_next_game()
+            monitor_game(game_id, on_team_score)
+        except KeyboardInterrupt:
+            print("Shutting down...")
+            break
+
+except Exception as e:
+    print(f"Unexpected error: {e}", file=sys.stderr)
+    raise SystemExit(1) from e
+
+finally:
+    hw.hardware_deinit()
