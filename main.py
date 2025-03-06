@@ -4,11 +4,13 @@ import argparse
 import configparser
 import sys
 import time
+import traceback
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Callable, Optional
 
 import pygame
+from httpx import HTTPError
 from nhlpy import NHLClient
 from nhlpy.http_client import NHLApiException
 
@@ -18,7 +20,7 @@ SCRIPT_DIR = Path(__file__).parent
 GOAL_SFX = Path(SCRIPT_DIR, "goal.mp3")
 CONFIG_FILE = Path(SCRIPT_DIR, "config.ini")
 
-SCHEDULE_POLL_INTERVAL = 3600
+SCHEDULE_POLL_INTERVAL = 5
 ON_TEAM_SCORE_DELAYS = 0, 10, 30, 60
 
 
@@ -97,7 +99,7 @@ def get_next_game(team: str) -> Optional[tuple[int, datetime]]:
     """
     try:
         info = client.schedule.get_schedule_by_team_by_week(team)
-    except NHLApiException:
+    except (NHLApiException, HTTPError):
         print("Failed to retrieve schedule", file=sys.stderr)
         return None
 
@@ -159,7 +161,7 @@ def monitor_game(game_id: int, handler: Callable[[int], None]) -> None:
 
     try:
         info = client.game_center.boxscore(game_id)
-    except NHLApiException:
+    except (NHLApiException, HTTPError):
         print("Failed to retrieve game", file=sys.stderr)
         return
 
@@ -168,7 +170,7 @@ def monitor_game(game_id: int, handler: Callable[[int], None]) -> None:
         time.sleep(1)
         try:
             info = client.game_center.boxscore(game_id)
-        except NHLApiException:
+        except (NHLApiException, HTTPError):
             # silently ignore and try again
             continue
 
@@ -180,7 +182,7 @@ def monitor_game(game_id: int, handler: Callable[[int], None]) -> None:
 
         try:
             info = client.game_center.boxscore(game_id)
-        except NHLApiException:
+        except (NHLApiException, HTTPError):
             # silently ignore and try again
             continue
 
@@ -214,6 +216,7 @@ try:
 
 except Exception as e:
     print(f"Unexpected error: {e}", file=sys.stderr)
+    traceback.print_exception(e, file=sys.stderr)
     raise SystemExit(1) from e
 
 finally:
