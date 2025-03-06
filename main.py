@@ -37,7 +37,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument(
     "team", type=validate_team, help="Three-letter team name abbreviation"
 )
-TEAM = parser.parse_args().team.upper()
+TEAM = "LAK"  # parser.parse_args().team.upper()
 
 print("Starting...")
 
@@ -111,7 +111,7 @@ def get_next_game(team: str) -> Optional[tuple[int, datetime]]:
                     tzinfo=timezone.utc
                 ),
             ),
-            filter(lambda json: json["gameState"] != "OFF", info),
+            filter(lambda json: json["gameState"] not in ("FINAL", "OFF"), info),
         )
     )
 
@@ -177,7 +177,7 @@ def monitor_game(game_id: int, handler: Callable[[int], None]) -> None:
     side = "homeTeam" if info["homeTeam"]["abbrev"] == TEAM else "awayTeam"
     team_score = info[side]["score"]
 
-    while info["gameState"] != "OFF":
+    while info["gameState"] not in ("FINAL", "OFF"):
         time.sleep(1)
 
         try:
