@@ -20,7 +20,7 @@ SCRIPT_DIR = Path(__file__).parent
 GOAL_SFX = Path(SCRIPT_DIR, "goal.mp3")
 CONFIG_FILE = Path(SCRIPT_DIR, "config.ini")
 
-SCHEDULE_POLL_INTERVAL = 5
+SCHEDULE_POLL_INTERVAL = 60 * 60
 ON_TEAM_SCORE_DELAYS = 0, 10, 30, 60
 
 
