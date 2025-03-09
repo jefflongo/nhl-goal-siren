@@ -188,8 +188,8 @@ def monitor_game(game_id: int, handler: Callable[[int], None]) -> None:
 
         new_team_score = info[side]["score"]
         if new_team_score > team_score:
-            team_score = new_team_score
-            handler(team_score)
+            handler(new_team_score)
+        team_score = new_team_score
 
     print(f"{TEAM} game ended")
 
