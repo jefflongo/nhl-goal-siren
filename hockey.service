@@ -7,10 +7,10 @@ User=<USERNAME>
 Group=<USERNAME>
 ExecStart=<PATH_TO_PYTHON_EXE> <PATH_TO_GIT_REPO>/main.py <TEAM>
 WorkingDirectory=<PATH_TO_GIT_REPO>
-Environment=XDG_RUNTIME_DIR=/run/user/1000
-Environment=PYGAME_HIDE_SUPPORT_PROMPT=1
-Environment=PYTHONUNBUFFERED=1
 Environment=PYTHONPATH=<PATH_TO_PYTHON_ENV_SITE_PACKAGES>
+Environment=PYTHONUNBUFFERED=1
+Environment=PYGAME_HIDE_SUPPORT_PROMPT=1
+Environment=XDG_RUNTIME_DIR=/run/user/1000
 Restart=always
 RestartSec=5
 KillSignal=SIGINT

@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 import argparse
 import configparser
@@ -37,7 +37,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument(
     "team", type=validate_team, help="Three-letter team name abbreviation"
 )
-TEAM = "LAK"  # parser.parse_args().team.upper()
+TEAM = parser.parse_args().team.upper()
 
 print("Starting...")
 
