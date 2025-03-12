@@ -103,17 +103,21 @@ def get_next_game(team: str) -> Optional[tuple[int, datetime]]:
         print("Failed to retrieve schedule", file=sys.stderr)
         return None
 
-    schedule = list(
-        map(
-            lambda json: (
-                json["id"],
-                datetime.strptime(json["startTimeUTC"], "%Y-%m-%dT%H:%M:%SZ").replace(
-                    tzinfo=timezone.utc
+    try:
+        schedule = list(
+            map(
+                lambda json: (
+                    json["id"],
+                    datetime.strptime(
+                        json["startTimeUTC"], "%Y-%m-%dT%H:%M:%SZ"
+                    ).replace(tzinfo=timezone.utc),
                 ),
-            ),
-            filter(lambda json: json["gameState"] not in ("FINAL", "OFF"), info),
+                filter(lambda json: json["gameState"] not in ("FINAL", "OFF"), info),
+            )
         )
-    )
+    except KeyError as e:
+        print(f"Failed to parse schedule (failed key: {e})", file=sys.stderr)
+        return None
 
     if not schedule:
         # no games this week
@@ -186,7 +190,15 @@ def monitor_game(game_id: int, handler: Callable[[int], None]) -> None:
             # silently ignore and try again
             continue
 
-        new_team_score = info[side]["score"]
+        try:
+            new_team_score = info[side]["score"]
+        except KeyError as e:
+            print(
+                f"Failed to parse score (game state: {info['gameState']}, failed key: {e})",
+                file=sys.stderr,
+            )
+            continue
+
         if new_team_score > team_score:
             handler(new_team_score)
         team_score = new_team_score
